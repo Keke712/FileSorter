@@ -7,7 +7,8 @@ import win32file, win32con, pywintypes
 from tqdm import tqdm
 
 choice = input("Sort by:\n1. Creation date\n2. Modification date (recommended)\n: ")
-choice2 = input("\nSave old files (Y/N): ")
+choice2 = input("\nBy day or month (D/M) ?")
+choice3 = input("\nSave old files (Y/N): ")
 
 directory = os.getcwd()
 
@@ -37,18 +38,35 @@ def main():
 
                     # Format file date
                     # Choice with the first input
-                    if choice == "1":
-                        month_year = datetime.fromtimestamp(created_time).strftime('%Y %B')
-                    elif choice == "2":
-                        month_year = datetime.fromtimestamp(modified_time).strftime('%Y %B')
+
+                    if choice2 == "M":
+                        if choice == "1":
+                            month_year = datetime.fromtimestamp(created_time).strftime('%Y %B')
+                        elif choice == "2":
+                            month_year = datetime.fromtimestamp(modified_time).strftime('%Y %B')
+                        else:
+                            print("\nSort option is not valid")
+                            sys.exit()
+                        
+                        path_to_save = directory+"\\"+month_year
+                        
+                        check_dir(path_to_save)
+                        file_to_save = path_to_save+"\\"+name
+                    elif choice2 == "D":
+                        if choice == "1":
+                            month_day = datetime.fromtimestamp(created_time).strftime('%B %d')
+                        elif choice == "2":
+                            month_day = datetime.fromtimestamp(modified_time).strftime('%B %d')
+                        else:
+                            print("\nSort option is not valid")
+                            sys.exit()
+                        
+                        path_to_save = directory+"\\"+month_day
+                        
+                        check_dir(path_to_save)
+                        file_to_save = path_to_save+"\\"+name
                     else:
-                        print("\nSort option is not valid")
-                        sys.exit()
-                    
-                    path_to_save = directory+"\\"+month_year
-                    
-                    check_dir(path_to_save)
-                    file_to_save = path_to_save+"\\"+name
+                        print("\nDate option is not valid")
 
                     if not os.path.exists(file_to_save):
                         # Copy file with metadata
@@ -83,11 +101,11 @@ def main():
                         # Close the file handle
                         win32file.CloseHandle(handle)
 
-                        if choice2 == "Y":
+                        if choice3 == "Y":
                             # Y: Move old file in rollback folder
                             check_dir(rollback_folder)
                             shutil.move(name, rollback_folder)
-                        elif choice2 == "N":
+                        elif choice3 == "N":
                             # N: Delete files
                             os.remove(name)
                         else:
